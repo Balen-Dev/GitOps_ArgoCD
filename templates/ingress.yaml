@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: greeting-apis-ingress
+  namespace: greeting-apis
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    cert-manager.io/cluster-issuer: letsencrypt-digitalocean-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /go(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: go-api
+                port:
+                  number: 80
+          - path: /dotnet(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: dotnet-api
+                port:
+                  number: 80
+          - path: /nodejs(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: nodejs-api
+                port:
+                  number: 80
+          - path: /rails(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: rails-api
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: greeting-apis-tls

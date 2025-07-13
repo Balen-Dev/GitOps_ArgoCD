@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rails-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rails-api
+  template:
+    metadata:
+      labels:
+        app: rails-api
+    spec:
+      containers:
+        - name: rails-api
+          image: {{ .Values.rails.image }}
+          ports:
+            - containerPort: {{ .Values.rails.containerPort }}
+          env:
+            - name: SECRET_KEY_BASE
+              value: {{ .Values.rails.secretKeyBase | quote }}

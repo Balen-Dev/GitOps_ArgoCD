@@ -1,0 +1,6 @@
+apiVersion: v2
+name: greeting-apis
+description: A Helm chart for deploying multiple APIs with a reverse proxy
+type: application
+version: 0.3.0
+appVersion: "1.0"

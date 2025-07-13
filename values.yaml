@@ -1,0 +1,20 @@
+dotnet:
+  image: balenabdalla/dotnet-greeting-api:latest
+  containerPort: 8082
+
+go:
+  image: balenabdalla/go-greeting-api:latest
+  containerPort: 8080
+
+nodejs:
+  image: balenabdalla/nodejs-greeting-api:latest
+  containerPort: 8081
+
+rails:
+  image: balenabdalla/rails-greeting-api:latest
+  containerPort: 3000
+  secretKeyBase: a24a513535dffd2f5611ff86d70592cb
+
+ingress:
+  enabled: true
+  host: argo.balen.krd
