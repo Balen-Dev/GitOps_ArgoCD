@@ -15,6 +15,11 @@ env:
 jobs:
   test-build-push:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+
     defaults:
       run:
         working-directory: services/go
