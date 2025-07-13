@@ -1,0 +1,80 @@
+name: Go CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "services/go/**"
+      - ".github/workflows/go.yaml"
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: balenabdalla/go-greeting-api
+
+jobs:
+  test-build-push:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/go
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24
+
+      - name: Run go vet (built-in linter)
+        run: go vet ./...
+
+      - name: Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+
+      - name: Run staticcheck
+        run: ~/go/bin/staticcheck ./...
+
+      - name: Install gosec
+        run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+
+      - name: Run gosec (security scan)
+        run: ~/go/bin/gosec ./...
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: services/go
+          file: services/go/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Update Helm values
+        run: |
+          cd ${{ github.workspace }}
+          sed -i "s|image: balenabdalla/go-greeting-api:.*|image: balenabdalla/go-greeting-api:${{ github.sha }}|" values.yaml
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add values.yaml
+          git commit -m "🚀 Update Go API image to ${{ github.sha }}"
+          git push
+
+      - name: Deployment notification
+        if: success()
+        run: |
+          echo "✅ New Go API image pushed: ${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "🔄 Helm values updated in values.yaml"
+          echo "🎯 ArgoCD will automatically detect and deploy the changes"
+          echo "📊 Monitor deployment at: https://argoui.balen.krd"
