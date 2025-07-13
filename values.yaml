@@ -3,7 +3,7 @@ dotnet:
   containerPort: 8082
 
 go:
-  image: balenabdalla/go-greeting-api:c1a67b94ca73ccca9215a46d81e565c8efb94266
+  image: balenabdalla/go-greeting-api:00e765634f314cffe92d029e59c1947aeab43624
   containerPort: 8080
 
 nodejs:
